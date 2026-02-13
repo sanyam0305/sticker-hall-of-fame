@@ -21,7 +21,32 @@
             <button class="btn-add-toggle" id="toggleAddForm">+ Add New Sticker</button>
             <div class="add-form" id="addForm">
                 <h3>Add a New Sticker</h3>
-                <div class="form-group">
+                
+                <!-- Upload Method Toggle -->
+                <div class="upload-toggle">
+                    <button class="toggle-btn active" id="toggleUpload" data-method="upload">Upload File</button>
+                    <button class="toggle-btn" id="toggleUrl" data-method="url">Paste URL</button>
+                </div>
+                
+                <!-- File Upload Area -->
+                <div class="form-group upload-area-group" id="uploadGroup">
+                    <label>Upload Sticker Image</label>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="stickerFile" accept="image/*" hidden>
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <span class="upload-icon">📤</span>
+                            <p>Click to upload or drag & drop</p>
+                            <span class="upload-hint">PNG, JPG, WEBP, GIF</span>
+                        </div>
+                        <div class="upload-preview" id="uploadPreview" style="display: none;">
+                            <img id="previewImage" src="" alt="Preview">
+                            <button class="remove-preview" id="removePreview">×</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- URL Input (hidden by default) -->
+                <div class="form-group url-group" id="urlGroup" style="display: none;">
                     <label for="stickerUrl">Sticker Image URL</label>
                     <input type="url" id="stickerUrl" placeholder="https://example.com/sticker.png">
                 </div>

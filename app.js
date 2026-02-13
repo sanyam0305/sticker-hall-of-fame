@@ -39,7 +39,10 @@ const state = {
     currentFilter: 'all',
     searchQuery: '',
     userLikes: JSON.parse(localStorage.getItem('stickerLikes') || '{}'),
-    isFirebaseConnected: false
+    isFirebaseConnected: false,
+    uploadMethod: 'upload', // 'upload' or 'url'
+    selectedFile: null,
+    selectedFileBase64: null
 };
 
 // ==========================================
@@ -67,7 +70,18 @@ const elements = {
     modalTags: document.getElementById('modalTags'),
     modalLikes: document.getElementById('modalLikes'),
     modalRank: document.getElementById('modalRank'),
-    toast: document.getElementById('toast')
+    toast: document.getElementById('toast'),
+    // Upload elements
+    toggleUpload: document.getElementById('toggleUpload'),
+    toggleUrl: document.getElementById('toggleUrl'),
+    uploadGroup: document.getElementById('uploadGroup'),
+    urlGroup: document.getElementById('urlGroup'),
+    uploadArea: document.getElementById('uploadArea'),
+    stickerFile: document.getElementById('stickerFile'),
+    uploadPlaceholder: document.getElementById('uploadPlaceholder'),
+    uploadPreview: document.getElementById('uploadPreview'),
+    previewImage: document.getElementById('previewImage'),
+    removePreview: document.getElementById('removePreview')
 };
 
 // ==========================================
@@ -228,28 +242,155 @@ function setupEventListeners() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeModal();
     });
+    
+    // Upload method toggle
+    elements.toggleUpload.addEventListener('click', () => {
+        state.uploadMethod = 'upload';
+        elements.toggleUpload.classList.add('active');
+        elements.toggleUrl.classList.remove('active');
+        elements.uploadGroup.style.display = 'block';
+        elements.urlGroup.style.display = 'none';
+    });
+    
+    elements.toggleUrl.addEventListener('click', () => {
+        state.uploadMethod = 'url';
+        elements.toggleUrl.classList.add('active');
+        elements.toggleUpload.classList.remove('active');
+        elements.urlGroup.style.display = 'block';
+        elements.uploadGroup.style.display = 'none';
+    });
+    
+    // File upload handling
+    elements.uploadArea.addEventListener('click', () => {
+        elements.stickerFile.click();
+    });
+    
+    elements.stickerFile.addEventListener('change', handleFileSelect);
+    
+    // Drag and drop
+    elements.uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        elements.uploadArea.classList.add('dragover');
+    });
+    
+    elements.uploadArea.addEventListener('dragleave', () => {
+        elements.uploadArea.classList.remove('dragover');
+    });
+    
+    elements.uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        elements.uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect({ target: { files: files } });
+        }
+    });
+    
+    // Remove preview
+    elements.removePreview.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearFilePreview();
+    });
+}
+
+// ==========================================
+// File Upload Handling
+// ==========================================
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file', 'error');
+        return;
+    }
+    
+    // Validate file size (max 500KB for Base64 storage)
+    if (file.size > 500 * 1024) {
+        showToast('File size must be under 500KB', 'error');
+        return;
+    }
+    
+    state.selectedFile = file;
+    
+    // Show preview and store Base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        state.selectedFileBase64 = e.target.result;
+        elements.previewImage.src = e.target.result;
+        elements.uploadPlaceholder.style.display = 'none';
+        elements.uploadPreview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearFilePreview() {
+    state.selectedFile = null;
+    state.selectedFileBase64 = null;
+    elements.stickerFile.value = '';
+    elements.previewImage.src = '';
+    elements.uploadPlaceholder.style.display = 'flex';
+    elements.uploadPreview.style.display = 'none';
 }
 
 // ==========================================
 // Sticker CRUD Operations
 // ==========================================
 function handleAddSticker() {
-    const url = elements.stickerUrl.value.trim();
     const name = elements.stickerName.value.trim();
     const category = elements.stickerCategory.value;
     const tagsInput = elements.stickerTags.value.trim();
     
     // Validation
-    if (!url) {
-        showToast('Please enter a sticker URL', 'error');
-        return;
-    }
-    
     if (!name) {
         showToast('Please enter a sticker name', 'error');
         return;
     }
     
+    // Check if we have an image (file or URL)
+    if (state.uploadMethod === 'upload') {
+        if (!state.selectedFile) {
+            showToast('Please select an image file', 'error');
+            return;
+        }
+        // Handle file upload
+        handleFileUploadAndSave(name, category, tagsInput);
+    } else {
+        const url = elements.stickerUrl.value.trim();
+        if (!url) {
+            showToast('Please enter a sticker URL', 'error');
+            return;
+        }
+        // Handle URL-based sticker
+        saveSticker(url, name, category, tagsInput);
+    }
+}
+
+async function handleFileUploadAndSave(name, category, tagsInput) {
+    // Use Base64 directly - no Firebase Storage needed!
+    if (!state.selectedFileBase64) {
+        showToast('Please select an image file', 'error');
+        return;
+    }
+    
+    // Show loading state
+    elements.addSticker.disabled = true;
+    elements.addSticker.textContent = 'Adding...';
+    
+    try {
+        // Store the Base64 image directly as the URL
+        await saveSticker(state.selectedFileBase64, name, category, tagsInput);
+    } catch (error) {
+        console.error('Error saving sticker:', error);
+        showToast('Error adding sticker. Try again.', 'error');
+    } finally {
+        elements.addSticker.disabled = false;
+        elements.addSticker.textContent = 'Add Sticker';
+    }
+}
+
+function saveSticker(url, name, category, tagsInput) {
     // Parse tags
     const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
     
@@ -266,7 +407,7 @@ function handleAddSticker() {
     if (state.isFirebaseConnected) {
         // Add to Firebase
         const newRef = stickersRef.push();
-        newRef.set(newSticker)
+        return newRef.set(newSticker)
             .then(() => {
                 showToast('Sticker added successfully!', 'success');
                 clearForm();
@@ -287,6 +428,7 @@ function handleAddSticker() {
         clearForm();
         elements.addForm.classList.remove('active');
         elements.toggleAddForm.textContent = '+ Add New Sticker';
+        return Promise.resolve();
     }
 }
 
@@ -522,6 +664,7 @@ function clearForm() {
     elements.stickerName.value = '';
     elements.stickerCategory.value = 'cute';
     elements.stickerTags.value = '';
+    clearFilePreview();
 }
 
 function showLoading(show) {
