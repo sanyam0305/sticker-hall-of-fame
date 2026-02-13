@@ -3,15 +3,14 @@
 // ==========================================
 
 // Firebase Configuration
-// IMPORTANT: Replace these values with your own Firebase project config
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyC2es1X51laIQ66WNilOxtXOA2g9GoB-FU",
+    authDomain: "sticker-hall-of-fame.firebaseapp.com",
+    databaseURL: "https://sticker-hall-of-fame-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "sticker-hall-of-fame",
+    storageBucket: "sticker-hall-of-fame.firebasestorage.app",
+    messagingSenderId: "1024452902044",
+    appId: "1:1024452902044:web:79cd143ad8be30ebd30159"
 };
 
 // Initialize Firebase
