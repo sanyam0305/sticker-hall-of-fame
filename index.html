@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticker Hall of Fame</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sticker Hall of Fame</h1>
+            <p class="subtitle">The cutest WhatsApp stickers, ranked by you!</p>
+        </header>
+
+        <!-- Add Sticker Form -->
+        <div class="add-sticker-section">
+            <button class="btn-add-toggle" id="toggleAddForm">+ Add New Sticker</button>
+            <div class="add-form" id="addForm">
+                <h3>Add a New Sticker</h3>
+                <div class="form-group">
+                    <label for="stickerUrl">Sticker Image URL</label>
+                    <input type="url" id="stickerUrl" placeholder="https://example.com/sticker.png">
+                </div>
+                <div class="form-group">
+                    <label for="stickerName">Sticker Name</label>
+                    <input type="text" id="stickerName" placeholder="Cute Cat Wave">
+                </div>
+                <div class="form-group">
+                    <label for="stickerCategory">Category</label>
+                    <select id="stickerCategory">
+                        <option value="cute">Cute</option>
+                        <option value="funny">Funny</option>
+                        <option value="love">Love</option>
+                        <option value="greeting">Greeting</option>
+                        <option value="reaction">Reaction</option>
+                        <option value="animal">Animal</option>
+                        <option value="food">Food</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="stickerTags">Tags (comma separated)</label>
+                    <input type="text" id="stickerTags" placeholder="cat, waving, hello">
+                </div>
+                <div class="form-actions">
+                    <button class="btn-primary" id="addSticker">Add Sticker</button>
+                    <button class="btn-secondary" id="cancelAdd">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label>Filter by Category:</label>
+                <div class="category-filters" id="categoryFilters">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="cute">Cute</button>
+                    <button class="filter-btn" data-category="funny">Funny</button>
+                    <button class="filter-btn" data-category="love">Love</button>
+                    <button class="filter-btn" data-category="greeting">Greeting</button>
+                    <button class="filter-btn" data-category="reaction">Reaction</button>
+                    <button class="filter-btn" data-category="animal">Animal</button>
+                    <button class="filter-btn" data-category="food">Food</button>
+                    <button class="filter-btn" data-category="other">Other</button>
+                </div>
+            </div>
+            <div class="search-group">
+                <input type="text" id="searchInput" placeholder="Search stickers...">
+            </div>
+        </div>
+
+        <!-- Sticker Grid -->
+        <div class="sticker-grid" id="stickerGrid">
+            <!-- Stickers will be dynamically added here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">🎨</div>
+            <h3>No stickers yet!</h3>
+            <p>Be the first to add a cute sticker to the Hall of Fame.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading stickers...</p>
+        </div>
+    </div>
+
+    <!-- Sticker Modal -->
+    <div class="modal" id="stickerModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <img src="" alt="" id="modalImage">
+            <h3 id="modalName"></h3>
+            <div class="modal-details">
+                <span class="modal-category" id="modalCategory"></span>
+                <div class="modal-tags" id="modalTags"></div>
+            </div>
+            <div class="modal-stats">
+                <span id="modalLikes">0 likes</span>
+                <span id="modalRank">Rank #1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- SortableJS for drag and drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <!-- Main App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
