@@ -588,11 +588,12 @@ function updateUI() {
         // Category filter
         const categoryMatch = state.currentFilter === 'all' || sticker.category === state.currentFilter;
         
-        // Search filter
+        // Search filter (handle missing tags)
+        const tags = sticker.tags || [];
         const searchMatch = !state.searchQuery || 
             sticker.name.toLowerCase().includes(state.searchQuery) ||
             sticker.category.toLowerCase().includes(state.searchQuery) ||
-            sticker.tags.some(tag => tag.toLowerCase().includes(state.searchQuery));
+            tags.some(tag => tag.toLowerCase().includes(state.searchQuery));
         
         return categoryMatch && searchMatch;
     });
@@ -614,7 +615,8 @@ function renderStickers() {
     elements.stickerGrid.innerHTML = state.filteredStickers.map((sticker, index) => {
         const isLiked = state.userLikes[sticker.id];
         const rankClass = index < 3 ? 'top-3' : '';
-        const tagsHtml = sticker.tags.map(tag => `<span class="sticker-tag">#${tag}</span>`).join('');
+        const tags = sticker.tags || [];
+        const tagsHtml = tags.map(tag => `<span class="sticker-tag">#${tag}</span>`).join('');
         
         return `
             <div class="sticker-card" data-id="${sticker.id}">
