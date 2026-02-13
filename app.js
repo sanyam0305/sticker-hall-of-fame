@@ -374,6 +374,15 @@ async function handleFileUploadAndSave(name, category, tagsInput) {
         return;
     }
     
+    // Check Base64 size (Firebase has ~10MB limit per node, but keep it small)
+    const base64Size = state.selectedFileBase64.length;
+    console.log('Base64 size:', base64Size, 'characters');
+    
+    if (base64Size > 1000000) { // ~750KB image
+        showToast('Image too large. Please use a smaller image.', 'error');
+        return;
+    }
+    
     // Show loading state
     elements.addSticker.disabled = true;
     elements.addSticker.textContent = 'Adding...';
@@ -383,7 +392,7 @@ async function handleFileUploadAndSave(name, category, tagsInput) {
         await saveSticker(state.selectedFileBase64, name, category, tagsInput);
     } catch (error) {
         console.error('Error saving sticker:', error);
-        showToast('Error adding sticker. Try again.', 'error');
+        showToast('Error: ' + error.message, 'error');
     } finally {
         elements.addSticker.disabled = false;
         elements.addSticker.textContent = 'Add Sticker';
@@ -416,7 +425,7 @@ function saveSticker(url, name, category, tagsInput) {
             })
             .catch((error) => {
                 console.error('Error adding sticker:', error);
-                showToast('Error adding sticker', 'error');
+                showToast('Error: ' + error.message, 'error');
             });
     } else {
         // Demo mode - local storage
